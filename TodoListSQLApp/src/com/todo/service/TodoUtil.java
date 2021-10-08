@@ -162,4 +162,28 @@ public class TodoUtil {
 		System.out.printf("총 %d개의 항목을 찾았습니다.\n",count);
 		
 	}
+	public static void listCateAll(TodoList l) {
+		int count = 0;
+		for(String item : l.getCategories()) {
+			System.out.print(item+" ");
+			count++;			
+		}
+		System.out.printf("총 %d개의 항목을 찾았습니다.\n",count);
+		
+	}
+	public static void findCateList(TodoList l, String keyword2) {
+		int count = 0;
+		for(String item : l.getListCategories(keyword2)) {
+			System.out.print(item.toString());
+			count++;			
+		}
+		System.out.printf("총 %d개의 항목을 찾았습니다.\n",count);
+		
+	}
+	public static void listAll(TodoList l, String orderby, int ordering) {
+		System.out.println("|                  	전체목록, 총 "+l.getCount()+"개			              |");
+		for(TodoItem item : l.getOrderedList(orderby, ordering)) {
+			System.out.print(item.toString());
+		}
+	}
 }

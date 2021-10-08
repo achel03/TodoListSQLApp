@@ -43,36 +43,40 @@ public class TodoMain {
 				break;
 
 			case "ls_name_asc":
-				l.sortByName();
+				TodoUtil.listAll(l,"title",1);
 				System.out.println("제목순으로 정렬하였습니다..");
 				isList = true;
 				break;
 
 			case "ls_name_desc":
-				l.sortByName();
-				l.reverseList();
+				TodoUtil.listAll(l,"title",0);
 				System.out.println("제목역순으로 정렬하였습니다.");
 				isList = true;
 				break;
 				
 			case "ls_date":
-				l.sortByDate();
+				TodoUtil.listAll(l,"due_date",1);
 				isList = true;
 				break;
 				
 			case "ls_date_desc":
-				l.sortByDateDesc();
+				TodoUtil.listAll(l,"due_date",0);
 				isList = true;
 				break;
 				
 			case "ls_cate":
-				l.listCate();
+				TodoUtil.listCateAll(l);
 				isList = true;
 				break;
 				
 			case "find":
 				String keyword = sc.nextLine().trim();
 				TodoUtil.findList(l,keyword);
+				break;
+			
+			case "find_cate":
+				String keyword2 = sc.nextLine().trim();
+				TodoUtil.findCateList(l,keyword2);
 				break;
 				
 			case "exit":
@@ -81,22 +85,9 @@ public class TodoMain {
 				break;
 
 			default:
-//				if(choice.contains("find_cate")) {
-//					String keyword = choice.replace("find_cate", " ").trim();
-//					l.find_cate(keyword);
-//				}else if(choice.contains("find")) {
-//					String keyword = choice.replace("find", " ").trim();
-//					l.find(keyword);
-//				}
-//				break;
-//					else {
-//					System.out.println("위의 항목 중 원하는 명령어 하나를 입력해주세요!~");
-//					break;
-//				}
 				
 			}
 			
-			if(isList) l.listAll();
 		} while (!quit);
 	sc.close();
 	}

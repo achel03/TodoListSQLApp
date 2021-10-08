@@ -188,5 +188,45 @@ public class TodoList {
 		}
 		return list;
 	}
+	public ArrayList<String> getCategories() {
+		ArrayList<String> list = new ArrayList<String>();
+		Statement pstmt;
+		String sql = "SELECT DISTINCT category FROM list";
+		try {
+			pstmt = conn.createStatement();
+			ResultSet rs = pstmt.executeQuery(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public ArrayList<String> getListCategories(String keyword2) {
+		ArrayList<String> list = new ArrayList<String>();
+		PreparedStatement pstmt;
+		String sql = "SELECT * FROM list WHERE category = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, keyword2);
+			ResultSet rs = pstmt.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public ArrayList<TodoItem> getOrderedList(String orderby, int ordering) {
+		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
+		Statement pstmt;
+		try {
+			pstmt = conn.createStatement();
+			String sql = "SELECT * FROM list ORDER BY title DESC"+orderby;
+			if(ordering==0) {
+				sql+="desc";
+			}
+			ResultSet rs = pstmt.executeQuery(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
 }
