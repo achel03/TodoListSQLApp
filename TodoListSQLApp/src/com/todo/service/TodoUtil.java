@@ -38,9 +38,9 @@ public class TodoUtil {
 		System.out.print(">>> 할 일의 마감일자를 입력해주세요 : ");
 		due = sc.nextLine();
 		
-		System.out.println("항목이 추가되었습니다 :)");
 		TodoItem t = new TodoItem(category, title, desc, due);
-		list.addItem(t);
+		if(list.addItem(t)>0)
+			System.out.println("항목이 추가되었습니다 :)");
 	}
 	public static void deleteItem(TodoList l) {
 		
@@ -51,12 +51,11 @@ public class TodoUtil {
 				+ ">>> 삭제할 할 일의 번호를 입력해주세요 : \n"
 				+ "\n");
 		int check = sc.nextInt();
-		l.listOne(check-1);
 		System.out.print("위 항목을 삭제하시겠습니까?(y/n)");
 		char rg = sc.next().charAt(0);
 		if(rg=='y') {
-			l.deleteItem(check-1);	
-			System.out.println("삭제되었습니다 :)");
+			if(l.deleteItem(check)>0)
+				System.out.println("삭제되었습니다 :)");
 		}
 		
 	}
@@ -71,17 +70,14 @@ public class TodoUtil {
 				+ ">>> 수정하고 싶은 할 일의 번호를 입력해주세요 : \n"
 				+ "\n");
 		int check = sc.nextInt();
-		l.listOne(check-1);
+
 		sc.nextLine(); // 개행 문자 제거
 		System.out.print(">>> 할 일의 카테고리를 입력해주세요 : ");
 		String new_category = sc.next();
 
 		System.out.print(">>> 새로운 할 일의 이름을 입력해주세요 : ");
 		String new_title = sc.next().trim();
-		if (l.isDuplicate(new_title)) {
-			System.out.println("ERROR: 이미 존재하는 항목의 이름입니다!!!");
-			return;
-		}
+
 		sc.nextLine();
 		System.out.print(">>> 새로운 할 일의 내용을 입력해주세요 : ");
 		String new_description = sc.nextLine().trim();
@@ -91,25 +87,20 @@ public class TodoUtil {
 		String new_due = sc.nextLine();
 		
 		TodoItem t = new TodoItem(new_category, new_title, new_description, new_due);
-		l.addItem(t, check-1);
-		System.out.println("항목이 수정되었습니다 :)");
+		t.setId(check);
+		if(l.updateItem(t)>0)
+			System.out.println("항목이 수정되었습니다 :)");
 
 	}
 
 	public static void listAll(TodoList l) {
 		System.out.println();
-		int count = 0;
-		int i=1;
-		for (TodoItem item : l.getList()) {
-			count++;
-		}
 		System.out.println(".=========================TODOLIST====================================.");
-		System.out.println("|                  	전체목록, 총 "+count+"개			              |");
+		System.out.println("|                  	전체목록, 총 "+l.getCount()+"개			              |");
         System.out.println("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|");
         System.out.println("|                                                                     |");
 		for (TodoItem item : l.getList()) {
-			System.out.println("|"+i+". [ " + item.getCategory()+" ] "+ item.getTitle() + " | " + item.getDesc()+" Time: "+item.getCurrent_date()+" - "+item.getDue_date());
-			i++;
+			System.out.println("|"+" [ " + item.toString()+" ] ");
 		}
 		System.out.println("|                                                                     |");
 		System.out.println("|.....................................................................|");

@@ -1,5 +1,14 @@
 package com.todo.dao;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 import com.todo.service.TodoSortByDate;
@@ -7,98 +16,177 @@ import com.todo.service.TodoSortByDateDesc;
 import com.todo.service.TodoSortByName;
 
 public class TodoList {
-	private List<TodoItem> list;
+	private Connection conn;
 
 	public TodoList() {
-		this.list = new ArrayList<TodoItem>();
+		this.conn = DbConnect.getConnection();
 	}
-
-	public void addItem(TodoItem t) {
-		list.add(t);
-	}
-
-	public void deleteItem(int check) {
-		list.remove(check);
-	}
-
-	void editItem(TodoItem t, TodoItem updated) {
-		int index = list.indexOf(t);
-		list.remove(index);
-		list.add(updated);
-	}
-
-	public ArrayList<TodoItem> getList() {
-		return new ArrayList<TodoItem>(list);
-	}
-
-	public void sortByName() {
-		Collections.sort(list, new TodoSortByName());
-
-	}
-	
-	public void sortByDateDesc() {
-		Collections.sort(list, new TodoSortByDateDesc());
-
-	}
-
-	public void listAll() {
-		System.out.println("\n"
-				+ "inside list_All method\n");
-		for (TodoItem myitem : list) {
-			System.out.println(myitem.getTitle() + myitem.getDesc());
+	public TodoItem getItem(int index) {
+		Statement stmt;
+		TodoItem t = null;
+		String sql = "SELECT id, title, memo, category, current_date, due_date";
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			if(rs.getRow()<1)
+				return null;
+			rs.next();
+			int id = rs.getInt("id");
+			String category = rs.getString("category");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return t;
 	}
-	public void listCate() {
-		HashSet<String> li = new HashSet<String>();
-		for (TodoItem myitem : list) {
-			li.add((String)(myitem.getCategory()));
+	public int addItem(TodoItem t) {
+		String sql = "insert into list (title, memo, category, current_date, due_date"+" values(?,?,?,?,?);";
+		PreparedStatement pstmt;
+		int count = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, t.getTitle());
+			pstmt.setString(2, t.getDesc());
+			pstmt.setString(3, t.getCategory());
+			pstmt.setString(4, t.getCurrent_date());
+			pstmt.setString(5, t.getDue_date());
+			count = pstmt.executeUpdate();
+			pstmt.close();
+		}catch(SQLException e) {
+			e.printStackTrace();
 		}
-		System.out.println(li);
+		return count;
 	}
-	public void find(String keyword){ // equals 사용해서 같은 값을 가지면 반환해
+	public int updateItem(TodoItem t) {
+		String sql = "update list set title=?, memo=?, category=?, current_date=?, due_date=?"+" where id=?;";
+		PreparedStatement pstmt;
+		int count = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, t.getTitle());
+			pstmt.setString(2, t.getDesc());
+			pstmt.setString(3, t.getCategory());
+			pstmt.setString(4, t.getCurrent_date());
+			pstmt.setString(5, t.getDue_date());
+			pstmt.setInt(6, t.getId());
+			count = pstmt.executeUpdate();
+			pstmt.close();
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return count;
+	}
+	public int deleteItem(int index) {
+		String sql = "delete from list where id=?;";
+		PreparedStatement pstmt;
+		int count=0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, index);
+			count = pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
-		for (TodoItem item : list) {
-//			if (keyword.equals(item.getTitle())||keyword.equals(item.getDesc())) {
-//				System.out.println("|"+". [ " + item.getCategory()+" ] "+ item.getTitle() + " | " + item.getDesc()+" Time: "+item.getCurrent_date()+" - "+item.getDue_date());
-//			}
-			if (item.getTitle().contains(keyword)||item.getDesc().contains(keyword)) {
-				System.out.println("|"+". [ " + item.getCategory()+" ] "+ item.getTitle() + " | " + item.getDesc()+" Time: "+item.getCurrent_date()+" - "+item.getDue_date());
-			}
-		}
-	}
-	public void find_cate(String keyword) {
-		for (TodoItem item : list) {
-			if(item.getCategory().contains(keyword)) {
-				System.out.println("|"+". [ " + item.getCategory()+" ] "+ item.getTitle() + " | " + item.getDesc()+" Time: "+item.getCurrent_date()+" - "+item.getDue_date());
-			}
-		}
-	}
-	public void listOne(int index) {
-		System.out.println((index+1)+". [ "+list.get(index).getCategory()+" ] "+ list.get(index).getTitle() + " | " + list.get(index).getDesc()+" Time: "+list.get(index).getCurrent_date()+" - "+list.get(index).getDue_date());
+		return count;
 		
 	}
-	
-	public void reverseList() {
-		Collections.reverse(list);
-	}
-
-	public void sortByDate() {
-		Collections.sort(list, new TodoSortByDate());
-	}
-
-	public int indexOf(TodoItem t) {
-		return list.indexOf(t);
-	}
-
-	public Boolean isDuplicate(String title) {
-		for (TodoItem item : list) {
-			if (title.equals(item.getTitle())) return true;
+	public ArrayList<TodoItem> getList(){
+		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			String sql = "SELECT * FROM list";
+			ResultSet rs;
+			rs = stmt.executeQuery(sql);
+			while(rs.next())
+			{
+				int id = rs.getInt("id");
+				String category = rs.getString("category");
+				String title = rs.getString("title");
+				String des = rs.getString("des");
+				String due = rs.getString("due");
+				String cur = rs.getString("cur");
+				TodoItem t = new TodoItem(category,title,des,due);
+				t.setId(id);
+				t.setCurrent_date(cur);
+				list.add(t);
+			}
+			stmt.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		return list;
+	}
+	public int getCount() {
+		Statement stmt;
+		int count = 0;
+		try {
+			stmt = conn.createStatement();
+		String sql = "SELECT count(id) FROM list;";
+		ResultSet rs = stmt.executeQuery(sql);
+		rs.next();
+		count = rs.getInt("count(id)");
+		stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return count;
+	}
+	public void importData(String filename) {
+		try {
+			BufferedReader r = new BufferedReader(new FileReader(filename));
+			String oneline;
+			String sql = "insert into list (title, memo, category, current_date, due_date"+" values(?,?,?,?,?);";
+			int records = 0;
+			while((oneline=r.readLine())!=null) {
+				StringTokenizer st = new StringTokenizer(oneline,"##"); 
+				String cat = st.nextToken();
+				String tit = st.nextToken();
+				String des = st.nextToken();
+				String cur_d = st.nextToken();
+				String due = st.nextToken();
+				
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, tit);
+					pstmt.setString(2, des);
+					pstmt.setString(3, cat);
+					pstmt.setString(4, cur_d);
+					pstmt.setString(5, due);
+					int count = pstmt.executeUpdate();
+					if(count>0)records++;
+					pstmt.close();	
+			}
+			System.out.println(records+"개의 항목들을 가져왔습니다 :)");
+			r.close();
+		}catch(FileNotFoundException e) {
+			System.out.println("todolist.txt 파일이 없습니다.");
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		} 
+	}
+	public boolean isDuplicate(String title) {
+		// TODO Auto-generated method stub
 		return false;
 	}
-
-	public void addItem(TodoItem t, int check) {
-		list.add(check, t);
+	public ArrayList<TodoItem> getList(String keyword) {
+		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
+		PreparedStatement pstmt;
+		keyword = "%"+keyword+"%";
+		String sql = "SELECT * FROM list WHERE title like ? or memo like ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, keyword);
+			pstmt.setString(2, keyword);
+			ResultSet rs = pstmt.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 }

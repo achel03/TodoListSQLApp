@@ -9,6 +9,7 @@ public class TodoItem {
     private String current_date; // static 했을 때 저장 문제
     private String category;
     private String due_date;
+    private int id;
 
 	public TodoItem(String category, String title, String desc, String due){
     	this.category=category;
@@ -61,4 +62,13 @@ public class TodoItem {
     public String toSaveString() {
     	return category+"##"+title+"##"+desc+"##"+current_date+"##"+due_date+"\n";
     }
+
+	public void setId(int id) {
+		this.id = id;
+		
+	}
+
+	public int getId() {
+		return id;
+	}
 }
