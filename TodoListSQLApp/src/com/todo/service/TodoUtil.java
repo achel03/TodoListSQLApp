@@ -152,4 +152,14 @@ public class TodoUtil {
 		for(String c: clist) if (c.equals(cate)) return true;
 		return false;
 	}
+	public static void findList(TodoList l, String keyword) {
+		int count = 0;
+		for(TodoItem item: l.getList(keyword))
+		{
+			System.out.println(item.toString());
+			count++;
+		}
+		System.out.printf("총 %d개의 항목을 찾았습니다.\n",count);
+		
+	}
 }
