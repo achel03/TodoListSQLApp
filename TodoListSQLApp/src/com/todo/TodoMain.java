@@ -9,13 +9,12 @@ import com.todo.service.TodoUtil;
 public class TodoMain {
 	
 	public static void start() {
-	
 		Scanner sc = new Scanner(System.in);
 		TodoList l = new TodoList();
 		l.importData("todolist.txt");
 		boolean isList = false;
 		boolean quit = false;
-		TodoUtil.BuffReader(l);
+//		TodoUtil.BuffReader(l);
 		do {
 			Menu.prompt();
 			isList = false;

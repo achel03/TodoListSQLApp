@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import com.todo.service.DbConnect;
 import com.todo.service.TodoSortByDate;
 import com.todo.service.TodoSortByDateDesc;
 import com.todo.service.TodoSortByName;
@@ -34,13 +35,12 @@ public class TodoList {
 			int id = rs.getInt("id");
 			String category = rs.getString("category");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return t;
 	}
 	public int addItem(TodoItem t) {
-		String sql = "insert into list (title, memo, category, current_date, due_date"+" values(?,?,?,?,?);";
+		String sql = "insert into list (title, memo, category, current_date, due_date)"+" values (?,?,?,?,?);";
 		PreparedStatement pstmt;
 		int count = 0;
 		try {
@@ -58,7 +58,7 @@ public class TodoList {
 		return count;
 	}
 	public int updateItem(TodoItem t) {
-		String sql = "update list set title=?, memo=?, category=?, current_date=?, due_date=?"+" where id=?;";
+		String sql = "update list set title=?, memo=?, category=?, current_date=?, due_date=?"+" where id = ?;";
 		PreparedStatement pstmt;
 		int count = 0;
 		try {
@@ -98,24 +98,22 @@ public class TodoList {
 		try {
 			stmt = conn.createStatement();
 			String sql = "SELECT * FROM list";
-			ResultSet rs;
-			rs = stmt.executeQuery(sql);
+			ResultSet rs = stmt.executeQuery(sql);
 			while(rs.next())
 			{
 				int id = rs.getInt("id");
 				String category = rs.getString("category");
 				String title = rs.getString("title");
-				String des = rs.getString("des");
-				String due = rs.getString("due");
-				String cur = rs.getString("cur");
-				TodoItem t = new TodoItem(category,title,des,due);
+				String description = rs.getString("memo");
+				String due_date = rs.getString("due_date");
+				String current_date= rs.getString("current_date");
+				TodoItem t = new TodoItem(title,description,category,due_date);
 				t.setId(id);
-				t.setCurrent_date(cur);
+				t.setCurrent_date(current_date);
 				list.add(t);
 			}
 			stmt.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return list;
@@ -139,46 +137,44 @@ public class TodoList {
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(filename));
 			String oneline;
-			String sql = "insert into list (title, memo, category, current_date, due_date"+" values(?,?,?,?,?);";
+			String sql = "insert into list (title, memo, category, current_date, due_date)"+" values (?,?,?,?,?);";
 			int records = 0;
 			while((oneline=r.readLine())!=null) {
 				StringTokenizer st = new StringTokenizer(oneline,"##"); 
-				String cat = st.nextToken();
-				String tit = st.nextToken();
-				String des = st.nextToken();
-				String cur_d = st.nextToken();
-				String due = st.nextToken();
+				String category = st.nextToken();
+				String title = st.nextToken();
+				String description = st.nextToken();
+				String current_date = st.nextToken();
+				String due_date = st.nextToken();
 				
 				PreparedStatement pstmt = conn.prepareStatement(sql);
-					pstmt.setString(1, tit);
-					pstmt.setString(2, des);
-					pstmt.setString(3, cat);
-					pstmt.setString(4, cur_d);
-					pstmt.setString(5, due);
-					int count = pstmt.executeUpdate();
-					if(count>0)records++;
-					pstmt.close();	
+				pstmt.setString(1, title);
+				pstmt.setString(2, description);
+				pstmt.setString(3, category);
+				pstmt.setString(4, current_date);
+				pstmt.setString(5, due_date);
+				int count = pstmt.executeUpdate();
+				if(count>0)records++;
+				pstmt.close();	
 			}
 			System.out.println(records+"개의 항목들을 가져왔습니다 :)");
 			r.close();
-		}catch(FileNotFoundException e) {
-			System.out.println("todolist.txt 파일이 없습니다.");
-		}catch (IOException e) {
-			e.printStackTrace();
-		}catch (SQLException e) {
+		}catch(Exception e) {
 			e.printStackTrace();
 		} 
 	}
-	public boolean isDuplicate(String title) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+//	public Boolean isDuplicate(String title) {
+//		for (TodoItem item : list) {
+//			if (title.equals(item.getTitle())) return true;
+//		}
+//		return false;
+//	}
 	public ArrayList<TodoItem> getList(String keyword) {
 		ArrayList<TodoItem> list = new ArrayList<TodoItem>();
 		PreparedStatement pstmt;
 		keyword = "%"+keyword+"%";
-		String sql = "SELECT * FROM list WHERE title like ? or memo like ?";
 		try {
+			String sql = "SELECT * FROM list WHERE title like ? or memo like ?";
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, keyword);
 			pstmt.setString(2, keyword);
@@ -190,11 +186,11 @@ public class TodoList {
 	}
 	public ArrayList<String> getCategories() {
 		ArrayList<String> list = new ArrayList<String>();
-		Statement pstmt;
+		Statement stmt;
 		String sql = "SELECT DISTINCT category FROM list";
 		try {
-			pstmt = conn.createStatement();
-			ResultSet rs = pstmt.executeQuery(sql);
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -218,9 +214,9 @@ public class TodoList {
 		Statement pstmt;
 		try {
 			pstmt = conn.createStatement();
-			String sql = "SELECT * FROM list ORDER BY title DESC"+orderby;
+			String sql = "SELECT * FROM list ORDER BY "+orderby;
 			if(ordering==0) {
-				sql+="desc";
+				sql+=" desc";
 			}
 			ResultSet rs = pstmt.executeQuery(sql);
 		} catch (SQLException e) {

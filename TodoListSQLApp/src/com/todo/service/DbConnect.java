@@ -1,4 +1,4 @@
-package com.todo.dao;
+package com.todo.service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +13,6 @@ public class DbConnect {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -23,12 +22,9 @@ public class DbConnect {
 		
 		if(conn==null) {
 			try {
-				String dbfile="todolist.db";
 				Class.forName("org.sqlite.JDBC");
-				conn = DriverManager.getConnection("jdbc:sqlite:"+dbfile);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (SQLException e) {
+				conn = DriverManager.getConnection("jdbc:sqlite:"+"todolist.db");
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
